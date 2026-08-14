@@ -3,12 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TERMINAL OS v2.6 // PROJECT_LOG</title>
+    <title>TERMINAL OS v3.0 // ULTIMATE EDITION</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --main-color: #ffb000;
+            --bg-color: #030201;
+            --card-bg: #050401;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -17,8 +23,8 @@
         }
 
         body {
-            background-color: #030201;
-            color: #ffb000;
+            background-color: var(--bg-color);
+            color: var(--main-color);
             font-family: 'VT323', monospace;
             font-size: 22px;
             letter-spacing: 1px;
@@ -27,449 +33,358 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow-x: hidden;
+            overflow: hidden;
             cursor: crosshair;
+            transition: color 0.3s, background-color 0.3s;
         }
 
-        /* 1. Эффект выпуклого кинескопа и сканирования */
+        /* 1. CRT экран и сканирование */
         .crt-overlay {
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
             background: 
-                radial-gradient(circle, rgba(0,0,0,0) 55%, rgba(0,0,0,0.9) 100%),
+                radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0,0,0,0) 20%, rgba(0,0,0,0.85) 80%),
                 linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.6) 50%);
             background-size: 100% 100%, 100% 4px;
             z-index: 100;
             pointer-events: none;
-            transition: opacity 0.3s;
         }
 
-        /* 2. Легкое мерцание экрана */
-        .flicker {
-            animation: crtFlicker 0.15s infinite;
-        }
-
+        /* 2. Мерцание */
+        .flicker { animation: crtFlicker 0.15s infinite; }
         @keyframes crtFlicker {
             0% { opacity: 0.97; }
             50% { opacity: 1; }
             100% { opacity: 0.98; }
         }
 
-        /* 3. Хост-контейнер */
+        /* 3. Окно терминала */
         .terminal {
-            max-width: 800px;
+            max-width: 820px;
             width: 100%;
-            border: 2px solid #ffb000;
+            border: 2px solid var(--main-color);
             padding: 25px;
             background-color: #000000;
-            box-shadow: 0 0 25px rgba(255, 176, 0, 0.25), inset 0 0 20px rgba(255, 176, 0, 0.15);
+            box-shadow: 0 0 25px rgba(255, 176, 0, 0.2), inset 0 0 20px rgba(255, 176, 0, 0.1);
             position: relative;
             z-index: 1;
-            transition: all 0.5s cubic-bezier(0.1, 0.85, 0.25, 1);
+            transition: transform 0.05s ease-out;
         }
 
-        /* 4. Выключение питания (CRT Off) */
-        .power-off {
-            transform: scaleY(0.005) scaleX(0.3) !important;
-            filter: brightness(10) !important;
-            opacity: 0 !important;
-        }
-
-        /* 5. Экран загрузки (Boot screen) */
-        #boot-screen {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            background-color: #000;
-            z-index: 200;
-            color: #ffb000;
-            font-family: 'VT323', monospace;
-            padding: 40px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            font-size: 1.4rem;
-        }
-
-        /* 6. Панель управления (Верхняя полоса) */
+        /* 4. Верхняя панель */
         .top-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 2px solid #ffb000;
+            border-bottom: 2px solid var(--main-color);
             padding-bottom: 10px;
             margin-bottom: 20px;
+            cursor: move; /* Перетаскивание */
         }
 
         .controls-btn {
-            background: #ffb000;
+            background: var(--main-color);
             color: #000;
             border: none;
             font-family: 'VT323', monospace;
-            font-size: 1rem;
-            padding: 2px 8px;
+            font-size: 0.9rem;
+            padding: 2px 6px;
             cursor: pointer;
             font-weight: bold;
+            margin-left: 4px;
         }
 
-        .controls-btn:hover {
-            background: #fff;
-            box-shadow: 0 0 10px #fff;
-        }
+        .controls-btn:hover { background: #fff; box-shadow: 0 0 10px #fff; }
 
-        /* 7. Заголовки с глитч-эффектом */
-        .glitch-text {
-            font-size: 3rem;
-            text-transform: uppercase;
-            text-shadow: 0 0 12px #ffb000;
-            position: relative;
-            display: inline-block;
-        }
-
-        .glitch-text:hover {
-            animation: glitch 0.2s infinite;
-        }
-
-        @keyframes glitch {
-            0% { transform: translate(0) }
-            20% { transform: translate(-3px, 3px) }
-            40% { transform: translate(-3px, -3px) }
-            60% { transform: translate(3px, 3px) }
-            80% { transform: translate(3px, -3px) }
-            100% { transform: translate(0) }
-        }
-
-        /* 8. Контейнер карточек проектов */
-        .project-list {
+        /* 5. Следящее око */
+        .eye-container {
             display: flex;
-            flex-direction: column;
-            gap: 20px;
-            margin: 20px 0;
-        }
-
-        .project-card {
-            border: 1px dashed #a87400;
-            padding: 15px;
-            background-color: #050401;
-            display: flex;
-            gap: 20px;
             align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .eye {
+            width: 30px; height: 18px;
+            border: 2px solid var(--main-color);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .pupil {
+            width: 8px; height: 8px;
+            background: var(--main-color);
+            border-radius: 50%;
+            transition: transform 0.1s ease;
+        }
+
+        /* 6. Проекты */
+        .project-list { display: flex; flex-direction: column; gap: 15px; margin: 20px 0; }
+        .project-card {
+            border: 1px dashed var(--main-color);
+            padding: 12px;
+            background-color: var(--card-bg);
+            display: flex; gap: 15px; align-items: center;
             transition: all 0.2s;
         }
-
         .project-card:hover {
             border-style: solid;
-            border-color: #ffb000;
             box-shadow: 0 0 15px rgba(255, 176, 0, 0.3);
             transform: translateX(5px);
         }
-
         .project-thumb {
-            width: 130px;
-            height: 90px;
-            object-fit: cover;
-            border: 1px solid #ffb000;
-            filter: grayscale(100%) sepia(100%) hue-rotate(5deg) saturate(500%);
+            width: 120px; height: 80px; object-fit: cover;
+            border: 1px solid var(--main-color);
+            filter: grayscale(100%) sepia(100%);
         }
+        .project-card:hover .project-thumb { filter: none; }
 
-        .project-card:hover .project-thumb {
-            filter: none;
-        }
-
-        /* 9. Консоль / Терминал ввода */
-        .console-box {
-            margin-top: 25px;
-            border: 1px solid #ffb000;
-            background: #050400;
-            padding: 15px;
-        }
-
-        .console-logs {
-            max-height: 120px;
-            overflow-y: auto;
-            margin-bottom: 10px;
-            font-size: 1rem;
-            color: #cc9000;
-        }
-
-        .console-input-row {
-            display: flex;
-            gap: 10px;
-        }
-
+        /* 7. Консоль */
+        .console-box { border: 1px solid var(--main-color); background: #000; padding: 12px; }
+        .console-logs { max-height: 100px; overflow-y: auto; font-size: 1rem; margin-bottom: 8px; }
+        .console-input-row { display: flex; gap: 8px; }
         .console-input {
-            background: transparent;
-            border: none;
-            color: #ffb000;
-            font-family: 'VT323', monospace;
-            font-size: 1.2rem;
-            width: 100%;
-            outline: none;
-        }
-
-        /* 10. Матричный холст (скрыт по умолчанию) */
-        #matrix-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100vw; height: 100vh;
-            z-index: 50;
-            display: none;
-            background: #000;
-        }
-
-        .status-badge {
-            background: #221500;
-            border: 1px solid #ffb000;
-            padding: 2px 6px;
-            font-size: 0.9rem;
+            background: transparent; border: none; color: var(--main-color);
+            font-family: 'VT323', monospace; font-size: 1.2rem; width: 100%; outline: none;
         }
 
         .retro-btn {
-            color: #000;
-            background: #ffb000;
-            text-decoration: none;
-            padding: 2px 10px;
-            font-weight: bold;
-            display: inline-block;
-            margin-top: 5px;
+            color: #000; background: var(--main-color);
+            text-decoration: none; padding: 2px 8px; font-weight: bold;
+            display: inline-block; margin-top: 5px;
         }
+        .retro-btn:hover { background: #fff; box-shadow: 0 0 10px #fff; }
 
-        .retro-btn:hover {
-            background: #fff;
-            box-shadow: 0 0 10px #fff;
+        /* Эффект жесткого глитча */
+        .glitch-active {
+            animation: hardGlitch 0.2s infinite;
+        }
+        @keyframes hardGlitch {
+            0% { transform: translate(5px, -5px) skew(10deg); filter: invert(1); }
+            50% { transform: translate(-5px, 5px) skew(-10deg); }
+            100% { transform: translate(0); filter: none; }
         }
     </style>
 </head>
 <body class="flicker">
 
-    <!-- Экран первичной загрузки BIOS -->
-    <div id="boot-screen">
-        <p>> SYSTEM BIOS v4.06 ... OK</p>
-        <p>> CHECKING RAM: 640KB OK</p>
-        <p>> LOADING ANALOG DRIVERS ... DONE</p>
-        <p>> MOUNTING /DEV/PROJECTS ... OK</p>
-        <p>> PRESS ANY KEY TO INITIALIZE INTERFACE ...</p>
-    </div>
-
-    <!-- CRTOverlay и холст эффектов -->
     <div class="crt-overlay" id="crt"></div>
-    <canvas id="matrix-canvas"></canvas>
 
-    <!-- Главный терминал -->
-    <main class="terminal" id="terminal-window">
+    <main class="terminal" id="terminal">
         
-        <div class="top-bar">
-            <div>
-                <span class="status-badge" id="clock">00:00:00</span>
-                <span class="status-badge">CPU: <span id="cpu-load">12</span>%</span>
+        <div class="top-bar" id="drag-handle">
+            <div class="eye-container">
+                <div class="eye"><div class="pupil" id="pupil"></div></div>
+                <span>CORE_OS v3.0</span>
             </div>
             <div>
-                <button class="controls-btn" onclick="toggleCRT()">CRT: TOGGLE</button>
-                <button class="controls-btn" onclick="powerOff()">POWER</button>
+                <button class="controls-btn" onclick="toggleNoise()">NOISE</button>
+                <button class="controls-btn" onclick="toggleRedAlert()">ALARM</button>
+                <button class="controls-btn" onclick="triggerGlitch()">GLITCH</button>
+                <button class="controls-btn" onclick="toggleMute()">MUTE</button>
             </div>
         </div>
 
         <header>
-            <h1 class="glitch-text">ANALOG_CORE</h1>
-            <p style="color: #a87400;">[SYSTEM READY] // INTERACTIVE TERMINAL MODE</p>
+            <h1 style="font-size: 2.8rem; text-shadow: 0 0 10px var(--main-color);">ANALOG_MONSTER</h1>
+            <p style="opacity: 0.7;">[STATUS: ACTIVE] // USER_ID: UNKNOWN</p>
         </header>
 
         <section class="project-list">
-            <div class="project-card" onMouseEnter="playHoverSound()">
-                <img src="https://via.placeholder.com/300x200/221100/ffb000?text=PROJECT_01" class="project-thumb" alt="Demo 1">
+            <div class="project-card" onmouseenter="playHover()">
+                <img src="https://via.placeholder.com/300x200/221100/ffb000?text=GAME_01" class="project-thumb">
                 <div>
-                    <h3>PROJECT_01 // BUCKSHOT</h3>
-                    <p>Экспериментальный хоррор в стиле ретро-электроники.</p>
-                    <a href="#" class="retro-btn" onclick="clickSound()">[ ЗАПУСТИТЬ ]</a>
+                    <h3>PROJECT // BUCKSHOT_ROULETTE_STYLE</h3>
+                    <p>Эксперимент с атмосферой и аналоговым звуком.</p>
+                    <a href="#" class="retro-btn" onclick="playClick()">[ ЗАПУСК ]</a>
                 </div>
             </div>
+        </div>
 
-            <div class="project-card" onMouseEnter="playHoverSound()">
-                <img src="https://via.placeholder.com/300x200/221100/ffb000?text=PROJECT_02" class="project-thumb" alt="Demo 2">
-                <div>
-                    <h3>PROJECT_02 // SIGNAL</h3>
-                    <p>Симулятор аналоговой радиостанции и мониторинга сигналов.</p>
-                    <a href="#" class="retro-btn" onclick="clickSound()">[ ЗАПУСТИТЬ ]</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Интерактивная консоль -->
         <section class="console-box">
             <div class="console-logs" id="logs">
-                <p>> Введите 'help' для списка доступных команд.</p>
+                <p>> Система готова. Команды: 'help', 'clear', 'alarm', 'noise'.</p>
             </div>
             <div class="console-input-row">
                 <span>></span>
-                <input type="text" id="cli" class="console-input" placeholder="команда..." autocomplete="off">
+                <input type="text" id="cli" class="console-input" placeholder="введи команду..." autocomplete="off">
             </div>
         </section>
 
     </main>
 
     <script>
-        // --- 1. Синтезатор звука на Web Audio API ---
+        // --- 1. Аудио система ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let isMuted = false;
+        let noiseNode = null;
 
-        function playClickSound() {
+        function playClick() {
+            if (isMuted) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'square';
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.05);
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.04);
             gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.05);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.04);
         }
 
-        function playHoverSound() {
+        function playHover() {
+            if (isMuted) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
-            gain.gain.setValueAtTime(0.02, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.03);
+            osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.02);
         }
 
-        function clickSound() { playClickSound(); }
+        function toggleMute() {
+            isMuted = !isMuted;
+            alert(isMuted ? 'Звук отключен' : 'Звук включен');
+        }
 
-        // --- 2. Системный экран загрузки ---
-        document.addEventListener('keydown', dismissBoot);
-        document.addEventListener('click', dismissBoot);
-
-        function dismissBoot() {
-            const boot = document.getElementById('boot-screen');
-            if (boot) {
-                playClickSound();
-                boot.style.display = 'none';
+        // --- 2. Генератор радио-шума (White Noise) ---
+        function toggleNoise() {
+            playClick();
+            if (noiseNode) {
+                noiseNode.stop();
+                noiseNode = null;
+            } else {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const bufferSize = audioCtx.sampleRate * 2;
+                const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = buffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() * 2 - 1;
+                }
+                noiseNode = audioCtx.createBufferSource();
+                noiseNode.buffer = buffer;
+                noiseNode.loop = true;
+                const gain = audioCtx.createGain();
+                gain.gain.value = 0.03; // Негромко
+                noiseNode.connect(gain);
+                gain.connect(audioCtx.destination);
+                noiseNode.start();
             }
         }
 
-        // --- 3. Часы и индикатор загрузки CPU ---
-        setInterval(() => {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
-            document.getElementById('cpu-load').innerText = Math.floor(Math.random() * 25) + 5;
-        }, 1000);
+        // --- 3. Следящий глаз и свет фонарика ---
+        document.addEventListener('mousemove', (e) => {
+            // Фонарик
+            document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
+            document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
 
-        // --- 4. Командная строка (CLI) ---
+            // Зрачок
+            const pupil = document.getElementById('pupil');
+            const eye = pupil.getBoundingClientRect();
+            const x = (e.clientX - eye.left) / 100;
+            const y = (e.clientY - eye.top) / 100;
+            pupil.style.transform = `translate(${Math.max(-5, Math.min(5, x))}px, ${Math.max(-3, Math.min(3, y))}px)`;
+        });
+
+        // --- 4. Режим Красной Тревоги ---
+        let redAlert = false;
+        function toggleRedAlert() {
+            playClick();
+            redAlert = !redAlert;
+            document.documentElement.style.setProperty('--main-color', redAlert ? '#ff0033' : '#ffb000');
+            document.documentElement.style.setProperty('--bg-color', redAlert ? '#0a0002' : '#030201');
+        }
+
+        // --- 5. Мгновенный глитч-шок ---
+        function triggerGlitch() {
+            playClick();
+            const term = document.getElementById('terminal');
+            term.classList.add('glitch-active');
+            setTimeout(() => term.classList.remove('glitch-active'), 500);
+        }
+
+        // --- 6. Консоль с историей команд и звуком печати ---
         const cli = document.getElementById('cli');
         const logs = document.getElementById('logs');
+        let cmdHistory = [];
+        let historyIndex = -1;
 
         cli.addEventListener('keydown', (e) => {
+            playHover(); // Звук клавиатуры
             if (e.key === 'Enter') {
-                playClickSound();
-                const cmd = cli.value.trim().toLowerCase();
+                playClick();
+                const val = cli.value.trim();
+                if (!val) return;
+
+                cmdHistory.push(val);
+                historyIndex = cmdHistory.length;
+
                 const p = document.createElement('p');
-                p.textContent = '> ' + cli.value;
+                p.textContent = '> ' + val;
                 logs.appendChild(p);
+
+                const cmd = val.toLowerCase();
                 cli.value = '';
 
                 const reply = document.createElement('p');
                 reply.style.color = '#fff';
 
-                switch(cmd) {
-                    case 'help':
-                        reply.textContent = 'Доступные команды: help, clear, about, matrix, date, color';
-                        break;
-                    case 'about':
-                        reply.textContent = 'ANALOG_CORE OS — Разработка экспериментальных ретро-проектов.';
-                        break;
-                    case 'clear':
-                        logs.innerHTML = '';
-                        return;
-                    case 'matrix':
-                        reply.textContent = 'Запуск генератора Matrix...';
-                        startMatrix();
-                        break;
-                    case 'date':
-                        reply.textContent = 'Текущая дата: ' + new Date().toLocaleDateString();
-                        break;
-                    case 'color':
-                        document.body.style.color = '#00ff66';
-                        document.querySelectorAll('.terminal, .console-box').forEach(el => el.style.borderColor = '#00ff66');
-                        reply.textContent = 'Цветовая схема изменена на GREEN CRT.';
-                        break;
-                    default:
-                        reply.textContent = 'Команда не распознана. Введите "help".';
-                }
+                if (cmd === 'help') reply.textContent = 'Команды: help, clear, alarm, noise, glitch';
+                else if (cmd === 'clear') { logs.innerHTML = ''; return; }
+                else if (cmd === 'alarm') { toggleRedAlert(); reply.textContent = 'Режим тревоги переключен.'; }
+                else if (cmd === 'noise') { toggleNoise(); reply.textContent = 'Радиошум переключен.'; }
+                else if (cmd === 'glitch') { triggerGlitch(); reply.textContent = 'Сбой спровоцирован.'; }
+                else reply.textContent = 'Неизвестный протокол.';
+
                 logs.appendChild(reply);
                 logs.scrollTop = logs.scrollHeight;
+            } else if (e.key === 'ArrowUp') {
+                if (historyIndex > 0) { historyIndex--; cli.value = cmdHistory[historyIndex]; }
+            } else if (e.key === 'ArrowDown') {
+                if (historyIndex < cmdHistory.length - 1) { historyIndex++; cli.value = cmdHistory[historyIndex]; }
+                else { historyIndex = cmdHistory.length; cli.value = ''; }
             }
         });
 
-        // --- 5. Эффект отключения (Power button) ---
-        function powerOff() {
-            playClickSound();
-            document.getElementById('terminal-window').classList.add('power-off');
-            setTimeout(() => {
-                alert('Питание отключено. Перезагрузите страницу для входа.');
-            }, 600);
-        }
+        // --- 7. Перетаскивание окна (Drag and Drop) ---
+        const dragHandle = document.getElementById('drag-handle');
+        const terminal = document.getElementById('terminal');
+        let isDragging = false, startX, startY, initialX, initialY;
 
-        // --- 6. Переключатель CRT наложения ---
-        function toggleCRT() {
-            playClickSound();
-            const crt = document.getElementById('crt');
-            crt.style.opacity = crt.style.opacity === '0' ? '1' : '0';
-        }
-
-        // --- 7. Пасхалка (Konami Code) ---
-        const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
-        let konamiIndex = 0;
-
-        document.addEventListener('keydown', (e) => {
-            if (e.key === konamiCode[konamiIndex]) {
-                konamiIndex++;
-                if (konamiIndex === konamiCode.length) {
-                    alert('⚠️ EMERGENCY PROTOCOL ACTIVATED: SYSTEM OVERRIDE ⚠️');
-                    document.body.style.filter = 'invert(1) hue-rotate(180deg)';
-                    konamiIndex = 0;
-                }
-            } else {
-                konamiIndex = 0;
-            }
+        dragHandle.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            const rect = terminal.getBoundingClientRect();
+            initialX = rect.left;
+            initialY = rect.top;
         });
 
-        // --- 8. Эффект Matrix Rain ---
-        function startMatrix() {
-            const canvas = document.getElementById('matrix-canvas');
-            canvas.style.display = 'block';
-            const ctx = canvas.getContext('2d');
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            terminal.style.position = 'absolute';
+            terminal.style.left = `${initialX + dx}px`;
+            terminal.style.top = `${initialY + dy}px`;
+        });
 
-            const chars = '0123456789ABCDEF';
-            const fontSize = 16;
-            const columns = canvas.width / fontSize;
-            const drops = Array(Math.floor(columns)).fill(1);
+        document.addEventListener('mouseup', () => isDragging = false);
 
-            function draw() {
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = '#ffb000';
-                ctx.font = fontSize + 'px VT323';
-
-                for (let i = 0; i < drops.length; i++) {
-                    const text = chars.charAt(Math.floor(Math.random() * chars.length));
-                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                        drops[i] = 0;
-                    }
-                    drops[i]++;
-                }
+        // --- 8. Случайные сообщения от системы ---
+        setInterval(() => {
+            if (Math.random() > 0.7) {
+                const p = document.createElement('p');
+                p.style.opacity = '0.5';
+                p.style.fontSize = '0.8rem';
+                p.textContent = `[SYS_LOG_${Math.floor(Math.random()*900+100)}]: SCANNING PORT ${Math.floor(Math.random()*8000)}... OK`;
+                logs.appendChild(p);
+                logs.scrollTop = logs.scrollHeight;
             }
-            setInterval(draw, 33);
-        }
+        }, 12000);
     </script>
 </body>
 </html>
