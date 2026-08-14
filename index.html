@@ -4,13 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TERMINAL // PROJECT_LOG</title>
-    <!-- Подключаем пиксельный терминальный шрифт с Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
     <style>
-        /* Сброс и базовые стили */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -18,8 +16,8 @@
         }
 
         body {
-            background-color: #0c0a06;
-            color: #ffb000; /* Классический амберный/янтарный цвет CRT-монитора */
+            background-color: #050403;
+            color: #ffb000;
             font-family: 'VT323', monospace;
             font-size: 22px;
             letter-spacing: 1px;
@@ -30,40 +28,50 @@
             align-items: flex-start;
         }
 
-        /* Эффект сканирующих полос CRT */
+        /* Эффект выгнутого экрана кинескопа + сканирующие полосы */
         .crt-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(
-                rgba(18, 16, 16, 0) 50%, 
-                rgba(0, 0, 0, 0.4) 50%
-            );
-            background-size: 100% 4px;
+            background: 
+                radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.85) 100%),
+                linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.5) 50%);
+            background-size: 100% 100%, 100% 4px;
             z-index: 10;
             pointer-events: none;
         }
 
         /* Главный контейнер терминала */
         .terminal {
-            max-width: 680px;
+            max-width: 720px;
             width: 100%;
             border: 2px solid #ffb000;
             padding: 30px;
             background-color: #000000;
-            box-shadow: 0 0 15px rgba(255, 176, 0, 0.25), inset 0 0 15px rgba(255, 176, 0, 0.1);
+            box-shadow: 0 0 20px rgba(255, 176, 0, 0.2), inset 0 0 15px rgba(255, 176, 0, 0.1);
             position: relative;
             z-index: 1;
         }
 
-        /* Заголовки */
+        /* Мигающий терминальный курсор */
+        .cursor {
+            display: inline-block;
+            width: 12px;
+            background-color: #ffb000;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
         h1 {
-            font-size: 3rem;
+            font-size: 3.2rem;
             text-transform: uppercase;
-            text-shadow: 0 0 10px #ffb000;
-            margin-bottom: 5px;
+            text-shadow: 0 0 12px #ffb000;
             line-height: 1;
         }
 
@@ -86,31 +94,53 @@
             background-color: #ffb000;
             display: inline-block;
             padding: 2px 10px;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            margin-top: 10px;
+            margin-bottom: 25px;
             text-transform: uppercase;
         }
 
-        /* Карточки проектов */
+        /* Карточки проектов с обложками */
         .project-list {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 25px;
             margin-bottom: 30px;
         }
 
         .project-card {
             border: 1px dashed #a87400;
-            padding: 20px;
+            padding: 15px;
             background-color: #080602;
+            display: flex;
+            gap: 20px;
+            align-items: center;
             transition: all 0.2s ease;
         }
 
         .project-card:hover {
             border-style: solid;
             border-color: #ffb000;
-            box-shadow: 0 0 10px rgba(255, 176, 0, 0.3);
-            transform: translateX(4px);
+            box-shadow: 0 0 15px rgba(255, 176, 0, 0.3);
+            transform: scale(1.01);
+        }
+
+        /* Превью-изображения в стиле пикселей / монохрома */
+        .project-thumb {
+            width: 140px;
+            height: 100px;
+            object-fit: cover;
+            border: 1px solid #ffb000;
+            filter: grayscale(100%) sepia(100%) hue-rotate(5deg) saturate(500%);
+            opacity: 0.8;
+        }
+
+        .project-card:hover .project-thumb {
+            opacity: 1;
+            filter: none; /* Возвращает нормальные цвета при наведении */
+        }
+
+        .project-info {
+            flex: 1;
         }
 
         .project-card h3 {
@@ -121,25 +151,24 @@
 
         .project-card p {
             color: #cc9000;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
         }
 
-        /* Ретро-кнопка */
         .retro-btn {
             display: inline-block;
             color: #000;
             background-color: #ffb000;
             text-decoration: none;
-            padding: 4px 12px;
+            padding: 2px 10px;
             font-weight: bold;
-            font-size: 1.2rem;
-            transition: background-color 0.2s ease;
+            font-size: 1.1rem;
         }
 
         .retro-btn:hover {
             background-color: #ffffff;
             color: #000;
-            box-shadow: 0 0 8px #ffffff;
+            box-shadow: 0 0 10px #ffffff;
         }
 
         /* Список ссылок */
@@ -156,16 +185,15 @@
             color: #ffb000;
             text-decoration: none;
             font-size: 1.4rem;
-            transition: color 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .links-list a:hover {
             color: #ffffff;
             text-shadow: 0 0 8px #ffffff;
-            padding-left: 5px;
+            padding-left: 8px;
         }
 
-        /* Подвал */
         footer {
             margin-top: 30px;
             border-top: 1px solid #a87400;
@@ -174,17 +202,28 @@
             color: #7d5700;
             text-align: center;
         }
+
+        /* Мобильная адаптация */
+        @media (max-width: 600px) {
+            .project-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .project-thumb {
+                width: 100%;
+                height: 140px;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Overlay эффект экрана -->
     <div class="crt-overlay"></div>
 
     <main class="terminal">
         <header>
-            <h1>SYSTEM_NAME</h1>
-            <p class="status">[STATUS: ONLINE] // ANALOG ARCHIVE</p>
+            <h1>SYSTEM_NAME<span class="cursor">&nbsp;</span></h1>
+            <p class="status">[STATUS: ONLINE] // ANALOG ARCHIVE_</p>
         </header>
 
         <section class="bio">
@@ -194,17 +233,25 @@
         <section class="projects">
             <h2>// ПРОЕКТЫ</h2>
             <div class="project-list">
+                
                 <div class="project-card">
-                    <h3>PROJECT_01</h3>
-                    <p>Экспериментальный хоррор-проект. Доступен на Itch.io.</p>
-                    <a href="#" class="retro-btn">[ ЗАПУСТИТЬ ]</a>
+                    <img src="https://via.placeholder.com/300x200/221100/ffb000?text=GAME_SCREEN_01" alt="Preview 1" class="project-thumb">
+                    <div class="project-info">
+                        <h3>PROJECT_01</h3>
+                        <p>Экспериментальный хоррор-проект. Доступен на Itch.io.</p>
+                        <a href="#" class="retro-btn">[ ЗАПУСТИТЬ ]</a>
+                    </div>
                 </div>
 
                 <div class="project-card">
-                    <h3>PROJECT_02</h3>
-                    <p>Аналоговый симулятор / Короткая демо-версия.</p>
-                    <a href="#" class="retro-btn">[ ЗАПУСТИТЬ ]</a>
+                    <img src="https://via.placeholder.com/300x200/221100/ffb000?text=GAME_SCREEN_02" alt="Preview 2" class="project-thumb">
+                    <div class="project-info">
+                        <h3>PROJECT_02</h3>
+                        <p>Аналоговый симулятор / Короткая демо-версия.</p>
+                        <a href="#" class="retro-btn">[ ЗАПУСТИТЬ ]</a>
+                    </div>
                 </div>
+
             </div>
         </section>
 
