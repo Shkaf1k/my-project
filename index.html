@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TERMINAL OS v3.0 // ULTIMATE EDITION</title>
+    <title>TERMINAL OS v4.0 // CYBER_EYE_EDITION</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
@@ -12,7 +12,8 @@
         :root {
             --main-color: #ffb000;
             --bg-color: #030201;
-            --card-bg: #050401;
+            --card-bg: #080602;
+            --glow-color: rgba(255, 176, 0, 0.25);
         }
 
         * {
@@ -38,20 +39,26 @@
             transition: color 0.3s, background-color 0.3s;
         }
 
-        /* 1. CRT экран и сканирование */
+        /* 1. CRT Наложение и закругление кинескопа */
         .crt-overlay {
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
             background: 
-                radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0,0,0,0) 20%, rgba(0,0,0,0.85) 80%),
+                radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0,0,0,0) 25%, rgba(0,0,0,0.85) 85%),
                 linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.6) 50%);
             background-size: 100% 100%, 100% 4px;
             z-index: 100;
             pointer-events: none;
         }
 
-        /* 2. Мерцание */
+        /* Эффект пузатого кинескопа */
+        .curved-screen {
+            transform: scale(0.96) rotateX(2deg) rotateY(1deg);
+            border-radius: 40px / 20px;
+            box-shadow: 0 0 50px var(--glow-color) !important;
+        }
+
         .flicker { animation: crtFlicker 0.15s infinite; }
         @keyframes crtFlicker {
             0% { opacity: 0.97; }
@@ -59,20 +66,20 @@
             100% { opacity: 0.98; }
         }
 
-        /* 3. Окно терминала */
+        /* 2. Контейнер терминала */
         .terminal {
             max-width: 820px;
             width: 100%;
             border: 2px solid var(--main-color);
             padding: 25px;
             background-color: #000000;
-            box-shadow: 0 0 25px rgba(255, 176, 0, 0.2), inset 0 0 20px rgba(255, 176, 0, 0.1);
+            box-shadow: 0 0 25px var(--glow-color), inset 0 0 20px var(--glow-color);
             position: relative;
             z-index: 1;
-            transition: transform 0.05s ease-out;
+            transition: all 0.3s cubic-bezier(0.1, 0.85, 0.25, 1);
         }
 
-        /* 4. Верхняя панель */
+        /* 3. Верхняя панель */
         .top-bar {
             display: flex;
             justify-content: space-between;
@@ -80,7 +87,6 @@
             border-bottom: 2px solid var(--main-color);
             padding-bottom: 10px;
             margin-bottom: 20px;
-            cursor: move; /* Перетаскивание */
         }
 
         .controls-btn {
@@ -92,34 +98,47 @@
             padding: 2px 6px;
             cursor: pointer;
             font-weight: bold;
-            margin-left: 4px;
+            margin-left: 3px;
         }
 
         .controls-btn:hover { background: #fff; box-shadow: 0 0 10px #fff; }
 
-        /* 5. Следящее око */
+        /* 4. Следящее Око с морганием */
         .eye-container {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 10px;
+            cursor: pointer;
         }
         .eye {
-            width: 30px; height: 18px;
+            width: 34px; height: 20px;
             border: 2px solid var(--main-color);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.1s;
         }
+        .eye:active { transform: scale(0.8); }
         .pupil {
-            width: 8px; height: 8px;
+            width: 9px; height: 9px;
             background: var(--main-color);
             border-radius: 50%;
-            transition: transform 0.1s ease;
+            transition: transform 0.05s ease-out;
+            box-shadow: 0 0 5px var(--main-color);
         }
+        /* Анимация века */
+        .eyelid {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 0%;
+            background: var(--main-color);
+            transition: height 0.1s;
+        }
+        .blink .eyelid { height: 100%; }
 
-        /* 6. Проекты */
+        /* 5. Карточки проектов с встроенной генеративной графикой */
         .project-list { display: flex; flex-direction: column; gap: 15px; margin: 20px 0; }
         .project-card {
             border: 1px dashed var(--main-color);
@@ -130,19 +149,49 @@
         }
         .project-card:hover {
             border-style: solid;
-            box-shadow: 0 0 15px rgba(255, 176, 0, 0.3);
+            box-shadow: 0 0 15px var(--glow-color);
             transform: translateX(5px);
         }
-        .project-thumb {
-            width: 120px; height: 80px; object-fit: cover;
+
+        /* Генеративное CSS-превью вместо картинки */
+        .project-preview {
+            width: 120px; height: 80px;
             border: 1px solid var(--main-color);
-            filter: grayscale(100%) sepia(100%);
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
         }
-        .project-card:hover .project-thumb { filter: none; }
+        .preview-grid {
+            position: absolute;
+            width: 200%; height: 200%;
+            background-image: linear-gradient(var(--main-color) 1px, transparent 1px),
+                              linear-gradient(90deg, var(--main-color) 1px, transparent 1px);
+            background-size: 10px 10px;
+            opacity: 0.2;
+            transform: perspective(100px) rotateX(60deg);
+            animation: gridMove 2s linear infinite;
+        }
+        @keyframes gridMove { 0% { transform: perspective(100px) rotateX(60deg) translateY(0); } 100% { transform: perspective(100px) rotateX(60deg) translateY(10px); } }
+
+        /* 6. Осциллограф (График волны) */
+        .oscilloscope-box {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid var(--main-color);
+            padding: 8px;
+            margin-bottom: 15px;
+            background: #000;
+        }
+        #scopeCanvas { width: 100%; height: 35px; background: #000; }
 
         /* 7. Консоль */
         .console-box { border: 1px solid var(--main-color); background: #000; padding: 12px; }
-        .console-logs { max-height: 100px; overflow-y: auto; font-size: 1rem; margin-bottom: 8px; }
+        .console-logs { max-height: 90px; overflow-y: auto; font-size: 0.95rem; margin-bottom: 8px; }
         .console-input-row { display: flex; gap: 8px; }
         .console-input {
             background: transparent; border: none; color: var(--main-color);
@@ -156,10 +205,7 @@
         }
         .retro-btn:hover { background: #fff; box-shadow: 0 0 10px #fff; }
 
-        /* Эффект жесткого глитча */
-        .glitch-active {
-            animation: hardGlitch 0.2s infinite;
-        }
+        .glitch-active { animation: hardGlitch 0.2s infinite; }
         @keyframes hardGlitch {
             0% { transform: translate(5px, -5px) skew(10deg); filter: invert(1); }
             50% { transform: translate(-5px, 5px) skew(-10deg); }
@@ -173,38 +219,64 @@
 
     <main class="terminal" id="terminal">
         
-        <div class="top-bar" id="drag-handle">
-            <div class="eye-container">
-                <div class="eye"><div class="pupil" id="pupil"></div></div>
-                <span>CORE_OS v3.0</span>
+        <div class="top-bar">
+            <div class="eye-container" onclick="pokeEye()" title="Нажми на око!">
+                <div class="eye" id="eye">
+                    <div class="eyelid"></div>
+                    <div class="pupil" id="pupil"></div>
+                </div>
+                <span>CORE_OS v4.0</span>
             </div>
             <div>
+                <button class="controls-btn" onclick="cyclePalette()">PALETTE</button>
+                <button class="controls-btn" onclick="toggleCurve()">CURVE</button>
                 <button class="controls-btn" onclick="toggleNoise()">NOISE</button>
-                <button class="controls-btn" onclick="toggleRedAlert()">ALARM</button>
                 <button class="controls-btn" onclick="triggerGlitch()">GLITCH</button>
-                <button class="controls-btn" onclick="toggleMute()">MUTE</button>
             </div>
         </div>
 
         <header>
             <h1 style="font-size: 2.8rem; text-shadow: 0 0 10px var(--main-color);">ANALOG_MONSTER</h1>
-            <p style="opacity: 0.7;">[STATUS: ACTIVE] // USER_ID: UNKNOWN</p>
+            <p style="opacity: 0.7;">[STATUS: ACTIVE] // EYE_TRACKING: ONLINE</p>
         </header>
 
+        <!-- Живой осциллограф сигнала -->
+        <div class="oscilloscope-box">
+            <span style="font-size: 0.8rem; opacity: 0.8;">SIGNAL:</span>
+            <canvas id="scopeCanvas"></canvas>
+        </div>
+
         <section class="project-list">
+            <!-- Проект 1 -->
             <div class="project-card" onmouseenter="playHover()">
-                <img src="https://via.placeholder.com/300x200/221100/ffb000?text=GAME_01" class="project-thumb">
+                <div class="project-preview">
+                    <div class="preview-grid"></div>
+                    <span style="z-index: 1; font-weight: bold;">[DEMO_01]</span>
+                </div>
                 <div>
                     <h3>PROJECT // BUCKSHOT_ROULETTE_STYLE</h3>
                     <p>Эксперимент с атмосферой и аналоговым звуком.</p>
                     <a href="#" class="retro-btn" onclick="playClick()">[ ЗАПУСК ]</a>
                 </div>
             </div>
-        </div>
+
+            <!-- Проект 2 -->
+            <div class="project-card" onmouseenter="playHover()">
+                <div class="project-preview">
+                    <div class="preview-grid" style="animation-direction: reverse;"></div>
+                    <span style="z-index: 1; font-weight: bold;">[DEMO_02]</span>
+                </div>
+                <div>
+                    <h3>PROJECT // RADIO_SIGNAL_MONITOR</h3>
+                    <p>Сканер перехвата аналоговых частот и сигналов.</p>
+                    <a href="#" class="retro-btn" onclick="playClick()">[ ЗАПУСК ]</a>
+                </div>
+            </div>
+        </section>
 
         <section class="console-box">
             <div class="console-logs" id="logs">
-                <p>> Система готова. Команды: 'help', 'clear', 'alarm', 'noise'.</p>
+                <p>> Система готова. Команды: 'help', 'hack', 'clear', 'palette', 'noise'.</p>
             </div>
             <div class="console-input-row">
                 <span>></span>
@@ -215,42 +287,93 @@
     </main>
 
     <script>
-        // --- 1. Аудио система ---
+        // --- 1. Синтезатор звука ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let isMuted = false;
         let noiseNode = null;
 
         function playClick() {
-            if (isMuted) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'square';
-            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.04);
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(700, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.04);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime + 0.04);
         }
 
         function playHover() {
-            if (isMuted) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = 'sine';
-            osc.frequency.setValueAtTime(220, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
             gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
             osc.connect(gain); gain.connect(audioCtx.destination);
             osc.start(); osc.stop(audioCtx.currentTime + 0.02);
         }
 
-        function toggleMute() {
-            isMuted = !isMuted;
-            alert(isMuted ? 'Звук отключен' : 'Звук включен');
+        // --- 2. Улучшенное Следящее Око с морганием ---
+        const pupil = document.getElementById('pupil');
+        const eyeEl = document.getElementById('eye');
+
+        document.addEventListener('mousemove', (e) => {
+            // Координаты для фонарика
+            document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
+            document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
+
+            // Поворот зрачка
+            const rect = eyeEl.getBoundingClientRect();
+            const eyeX = rect.left + rect.width / 2;
+            const eyeY = rect.top + rect.height / 2;
+            const angle = Math.atan2(e.clientY - eyeY, e.clientX - eyeX);
+            const dist = Math.min(6, Math.hypot(e.clientX - eyeX, e.clientY - eyeY) / 30);
+            
+            pupil.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px)`;
+        });
+
+        // Автоматическое моргание глаза
+        setInterval(() => {
+            if (Math.random() > 0.4) {
+                eyeEl.classList.add('blink');
+                setTimeout(() => eyeEl.classList.remove('blink'), 120);
+            }
+        }, 4000);
+
+        function pokeEye() {
+            playClick();
+            triggerGlitch();
+            eyeEl.classList.add('blink');
+            setTimeout(() => eyeEl.classList.remove('blink'), 300);
         }
 
-        // --- 2. Генератор радио-шума (White Noise) ---
+        // --- 3. Смена цветовых тем (Palette) ---
+        const palettes = [
+            { main: '#ffb000', bg: '#030201', card: '#080602', glow: 'rgba(255, 176, 0, 0.25)' }, // Amber
+            { main: '#00ff66', bg: '#000802', card: '#011204', glow: 'rgba(0, 255, 102, 0.25)' },  // Matrix Green
+            { main: '#ff0055', bg: '#080003', card: '#120007', glow: 'rgba(255, 0, 85, 0.25)' },   // Cyber Pink
+            { main: '#00d9ff', bg: '#000508', card: '#000d14', glow: 'rgba(0, 217, 255, 0.25)' }   // Ice Blue
+        ];
+        let currentPalette = 0;
+
+        function cyclePalette() {
+            playClick();
+            currentPalette = (currentPalette + 1) % palettes.length;
+            const p = palettes[currentPalette];
+            document.documentElement.style.setProperty('--main-color', p.main);
+            document.documentElement.style.setProperty('--bg-color', p.bg);
+            document.documentElement.style.setProperty('--card-bg', p.card);
+            document.documentElement.style.setProperty('--glow-color', p.glow);
+        }
+
+        // --- 4. Режим Выпуклого Экрана (Curve) ---
+        function toggleCurve() {
+            playClick();
+            document.getElementById('terminal').classList.toggle('curved-screen');
+        }
+
+        // --- 5. Генератор Радио-Шума ---
         function toggleNoise() {
             playClick();
             if (noiseNode) {
@@ -261,66 +384,61 @@
                 const bufferSize = audioCtx.sampleRate * 2;
                 const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
                 const output = buffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    output[i] = Math.random() * 2 - 1;
-                }
+                for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
                 noiseNode = audioCtx.createBufferSource();
-                noiseNode.buffer = buffer;
-                noiseNode.loop = true;
-                const gain = audioCtx.createGain();
-                gain.gain.value = 0.03; // Негромко
-                noiseNode.connect(gain);
-                gain.connect(audioCtx.destination);
+                noiseNode.buffer = buffer; noiseNode.loop = true;
+                const gain = audioCtx.createGain(); gain.gain.value = 0.02;
+                noiseNode.connect(gain); gain.connect(audioCtx.destination);
                 noiseNode.start();
             }
         }
 
-        // --- 3. Следящий глаз и свет фонарика ---
-        document.addEventListener('mousemove', (e) => {
-            // Фонарик
-            document.documentElement.style.setProperty('--mouse-x', e.clientX + 'px');
-            document.documentElement.style.setProperty('--mouse-y', e.clientY + 'px');
-
-            // Зрачок
-            const pupil = document.getElementById('pupil');
-            const eye = pupil.getBoundingClientRect();
-            const x = (e.clientX - eye.left) / 100;
-            const y = (e.clientY - eye.top) / 100;
-            pupil.style.transform = `translate(${Math.max(-5, Math.min(5, x))}px, ${Math.max(-3, Math.min(3, y))}px)`;
-        });
-
-        // --- 4. Режим Красной Тревоги ---
-        let redAlert = false;
-        function toggleRedAlert() {
-            playClick();
-            redAlert = !redAlert;
-            document.documentElement.style.setProperty('--main-color', redAlert ? '#ff0033' : '#ffb000');
-            document.documentElement.style.setProperty('--bg-color', redAlert ? '#0a0002' : '#030201');
-        }
-
-        // --- 5. Мгновенный глитч-шок ---
         function triggerGlitch() {
             playClick();
             const term = document.getElementById('terminal');
             term.classList.add('glitch-active');
-            setTimeout(() => term.classList.remove('glitch-active'), 500);
+            setTimeout(() => term.classList.remove('glitch-active'), 400);
         }
 
-        // --- 6. Консоль с историей команд и звуком печати ---
+        // --- 6. Отрисовка Осциллографа ---
+        const scopeCanvas = document.getElementById('scopeCanvas');
+        const scopeCtx = scopeCanvas.getContext('2d');
+        let step = 0;
+
+        function drawScope() {
+            scopeCanvas.width = scopeCanvas.offsetWidth;
+            scopeCanvas.height = scopeCanvas.offsetHeight;
+            scopeCtx.clearRect(0, 0, scopeCanvas.width, scopeCanvas.height);
+            
+            const mainColor = getComputedStyle(document.documentElement).getPropertyValue('--main-color').trim();
+            scopeCtx.strokeStyle = mainColor;
+            scopeCtx.lineWidth = 2;
+            scopeCtx.beginPath();
+
+            const width = scopeCanvas.width;
+            const height = scopeCanvas.height;
+            
+            for (let x = 0; x < width; x++) {
+                const y = height / 2 + Math.sin(x * 0.05 + step) * 8 * Math.cos(x * 0.01 + step * 0.5);
+                if (x === 0) scopeCtx.moveTo(x, y);
+                else scopeCtx.lineTo(x, y);
+            }
+            scopeCtx.stroke();
+            step += 0.08;
+            requestAnimationFrame(drawScope);
+        }
+        drawScope();
+
+        // --- 7. Консоль и Мини-игра Hack ---
         const cli = document.getElementById('cli');
         const logs = document.getElementById('logs');
-        let cmdHistory = [];
-        let historyIndex = -1;
 
         cli.addEventListener('keydown', (e) => {
-            playHover(); // Звук клавиатуры
+            playHover();
             if (e.key === 'Enter') {
                 playClick();
                 const val = cli.value.trim();
                 if (!val) return;
-
-                cmdHistory.push(val);
-                historyIndex = cmdHistory.length;
 
                 const p = document.createElement('p');
                 p.textContent = '> ' + val;
@@ -332,59 +450,19 @@
                 const reply = document.createElement('p');
                 reply.style.color = '#fff';
 
-                if (cmd === 'help') reply.textContent = 'Команды: help, clear, alarm, noise, glitch';
+                if (cmd === 'help') reply.textContent = 'Команды: help, hack, palette, noise, clear';
                 else if (cmd === 'clear') { logs.innerHTML = ''; return; }
-                else if (cmd === 'alarm') { toggleRedAlert(); reply.textContent = 'Режим тревоги переключен.'; }
+                else if (cmd === 'palette') { cyclePalette(); reply.textContent = 'Цветовая палитра изменена.'; }
                 else if (cmd === 'noise') { toggleNoise(); reply.textContent = 'Радиошум переключен.'; }
-                else if (cmd === 'glitch') { triggerGlitch(); reply.textContent = 'Сбой спровоцирован.'; }
-                else reply.textContent = 'Неизвестный протокол.';
+                else if (cmd === 'hack') {
+                    reply.textContent = 'ИНИЦИАЛИЗА ВЗЛОМА... [КОД: ' + Math.floor(Math.random()*8999 + 1000) + ']';
+                    triggerGlitch();
+                } else reply.textContent = 'Команда не распознана.';
 
                 logs.appendChild(reply);
                 logs.scrollTop = logs.scrollHeight;
-            } else if (e.key === 'ArrowUp') {
-                if (historyIndex > 0) { historyIndex--; cli.value = cmdHistory[historyIndex]; }
-            } else if (e.key === 'ArrowDown') {
-                if (historyIndex < cmdHistory.length - 1) { historyIndex++; cli.value = cmdHistory[historyIndex]; }
-                else { historyIndex = cmdHistory.length; cli.value = ''; }
             }
         });
-
-        // --- 7. Перетаскивание окна (Drag and Drop) ---
-        const dragHandle = document.getElementById('drag-handle');
-        const terminal = document.getElementById('terminal');
-        let isDragging = false, startX, startY, initialX, initialY;
-
-        dragHandle.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            const rect = terminal.getBoundingClientRect();
-            initialX = rect.left;
-            initialY = rect.top;
-        });
-
-        document.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            terminal.style.position = 'absolute';
-            terminal.style.left = `${initialX + dx}px`;
-            terminal.style.top = `${initialY + dy}px`;
-        });
-
-        document.addEventListener('mouseup', () => isDragging = false);
-
-        // --- 8. Случайные сообщения от системы ---
-        setInterval(() => {
-            if (Math.random() > 0.7) {
-                const p = document.createElement('p');
-                p.style.opacity = '0.5';
-                p.style.fontSize = '0.8rem';
-                p.textContent = `[SYS_LOG_${Math.floor(Math.random()*900+100)}]: SCANNING PORT ${Math.floor(Math.random()*8000)}... OK`;
-                logs.appendChild(p);
-                logs.scrollTop = logs.scrollHeight;
-            }
-        }, 12000);
     </script>
 </body>
 </html>
