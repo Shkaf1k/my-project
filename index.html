@@ -3,20 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мои Игры</title>
+    <title>Игровой Форум & Каталог</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <header class="header">
-        <h1>МОИ ИГРЫ</h1>
+    <header class="navbar">
+        <div class="nav-container">
+            <div class="logo">GAME<span>LAB</span></div>
+            <nav class="nav-links">
+                <a href="#" class="active">Главная</a>
+                <a href="#">Проекты</a>
+                <a href="#">Сообщество</a>
+            </nav>
+        </div>
     </header>
 
-    <main class="container">
-        <section class="topic-item">
-            <h2>Название игры</h2>
-            <p class="description">Краткое описание вашей игры на Godot.</p>
-            <a href="topic.html?id=1" class="link">Играть / Скачать</a>
+    <main class="main-container">
+        <section class="hero">
+            <h1>Мои Проекты & Обсуждения</h1>
+            <p>Добро пожаловать! Здесь вы можете протестировать мои игры на Godot и принять участие в обсуждениях.</p>
+        </section>
+
+        <section class="cards-grid">
+            <!-- Карточка 1 -->
+            <article class="card">
+                <div class="card-header">
+                    <span class="tag godot">Godot 4</span>
+                    <span class="date">13 авг 2026</span>
+                </div>
+                <h2>Киберпанк Платформер</h2>
+                <p>Динамичный 2D-платформер с механиками рывка и замедления времени. Написано на GDScript.</p>
+                <div class="card-footer">
+                    <a href="topic.html?id=1" class="btn btn-primary">Играть / Скачать</a>
+                    <a href="topic.html?id=1#comments" class="btn btn-secondary">Обсудить (12)</a>
+                </div>
+            </article>
+
+            <!-- Карточка 2 -->
+            <article class="card">
+                <div class="card-header">
+                    <span class="tag prototype">Прототип</span>
+                    <span class="date">10 авг 2026</span>
+                </div>
+                <h2>Космический Хорор</h2>
+                <p>Исследование заброшенного корабля от первого лица. Тестирование системы освещения и звука.</p>
+                <div class="card-footer">
+                    <a href="topic.html?id=2" class="btn btn-primary">Играть / Скачать</a>
+                    <a href="topic.html?id=2#comments" class="btn btn-secondary">Обсудить (5)</a>
+                </div>
+            </article>
         </section>
     </main>
 
